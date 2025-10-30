@@ -1,21 +1,30 @@
+// db.js
 const { Pool } = require('pg');
 
-const isProd = process.env.NODE_ENV === 'production';
+let pool;
 
-const pool = process.env.DATABASE_URL
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: isProd ? { rejectUnauthorized: false } : false,
-    })
-  : new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 5432,
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'ciudadano_web',
-    });
+if (process.env.DATABASE_URL) {
+  // Producción: usa connection string completa + SSL
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }, // Render/Neon/Supabase
+  });
+} else {
+  // Desarrollo local (pgAdmin4)
+  pool = new Pool({
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'ciudadano_app',
+  });
+}
 
-pool.connect()
-  .then(() => console.log('✅ Conexión exitosa a PostgreSQL'))
-  .catch(err => console.error('❌ Error al conectar a PostgreSQL:', err));
+pool.on('error', (err) => {
+  console.error('💥 Error inesperado en el pool PG:', err);
+  process.exit(1);
+});
+
+module.exports = pool;
+
 
