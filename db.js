@@ -12,7 +12,7 @@ const pool = process.env.DATABASE_URL
       port: process.env.DB_PORT || 5432,
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'ciudadano_app',
+      database: process.env.DB_NAME || 'ciudadano_web',
     });
 
 pool.connect()
